@@ -62,7 +62,7 @@ To test the application endpoints, import the following JSON file into Postman o
 - Unit and integration tests implemented using Jest.
 - Run tests using:
   ```sh
-  npm test
+  npm run test
   ```
 
 ## Development Time Consideration
