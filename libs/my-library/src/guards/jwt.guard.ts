@@ -13,6 +13,7 @@ export class JwtAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext) {
+    try {
     const request = context.switchToHttp().getRequest<Request>()
     const authHeader = request.headers.authorization
 
@@ -22,7 +23,6 @@ export class JwtAuthGuard implements CanActivate {
 
     const token = authHeader.split(' ')[1]
 
-    try {
       const decoded = jwt.verify(token, this.secret)
 
       const photoId = this.getPhotoId(request)

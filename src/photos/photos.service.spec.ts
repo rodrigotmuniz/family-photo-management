@@ -180,15 +180,4 @@ describe('Photos Service', () => {
       expect(repository.create).toHaveBeenLastCalledWith(createInput)
     })
   })
-
-  describe('function', () => {
-    it('should c...', async () => {
-      // ARANGE
-
-      // ACT
-
-      // ASSERT
-      expect(1).toBe(1)
-    })
-  })
 })
