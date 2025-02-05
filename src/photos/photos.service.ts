@@ -31,16 +31,18 @@ export class PhotosService {
   }
 
   async findById(id: number) {
-    const photo = await this.repository.findOne({ where: { id }})
+    const photo = await this.repository.findOneBy({ id })
 
-    if (!photo) throw new NotFoundException(`Photo with id: ${id} was not found.`)
+    if (!photo) {
+      throw new NotFoundException(`Photo with id: ${id} was not found.`)
+    }
     return photo
   }
 
   async remove(id: number) {
     const result = await this.repository.delete({ id })
     if (result.affected === 0) {
-      throw new NotFoundException(`Photo with id ${id} was not found`)
+      throw new NotFoundException(`Photo with id: ${id} was not found.`)
     }
     return { message: 'Photo deleted successfully!' }
   }
@@ -51,7 +53,7 @@ export class PhotosService {
       ...photo,
       ...updatePhotoDto,
     })
-    const updatedPhoto = await this.repository.save(updatePhoto)
+     const updatedPhoto = await this.repository.save(updatePhoto)
     return updatedPhoto
   }
 }

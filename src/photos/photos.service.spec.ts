@@ -1,24 +1,15 @@
-import { TestingModule, Test } from "@nestjs/testing";
-import { getRepositoryToken } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
-import { Photo } from "./entities/photo.entity";
-import { PhotosService } from "./photos.service";
-import { NotFoundException } from "@nestjs/common";
+import { Repository } from 'typeorm'
+import { PhotosService } from './photos.service'
+import { Photo } from './entities/photo.entity'
+import { Test, TestingModule } from '@nestjs/testing'
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm'
+import { CreatePhotoDto } from './dto/create-photo.dto'
+import { IPhoto } from '@app/my-library/interfaces/photo.interface'
+import { NotFoundException } from '@nestjs/common'
 
-const mockPhotoRepository = {
-  create: jest.fn(),
-  save: jest.fn(),
-  findOne: jest.fn(),
-  delete: jest.fn(),
-};
-
-const mockAlbumRepository = {
-  findOne: jest.fn(),
-};
-
-describe('PhotosService', () => {
-  let service: PhotosService;
-  let photoRepository: Repository<Photo>;
+describe('Photos Service', () => {
+  let service: PhotosService
+  let repository: Repository<Photo>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,75 +17,178 @@ describe('PhotosService', () => {
         PhotosService,
         {
           provide: getRepositoryToken(Photo),
-          useValue: mockPhotoRepository,
+          useValue: {
+            create: jest.fn(),
+            save: jest.fn(),
+            delete: jest.fn(),
+            findOneBy: jest.fn(),
+          },
         },
-        // {
-        //   provide: getRepositoryToken(Album),
-        //   useValue: mockAlbumRepository,
-        // },
       ],
-    }).compile();
+    }).compile()
+    service = module.get(PhotosService)
+    repository = module.get(getRepositoryToken(Photo))
+  })
 
-    service = module.get<PhotosService>(PhotosService);
-    photoRepository = module.get<Repository<Photo>>(getRepositoryToken(Photo));
-  });
+  describe('photosService', () => {
+    it('should be defined', () => {
+      expect(service).toBeDefined()
+    })
+  })
+  describe('photosRepository', () => {
+    it('should be defined', () => {
+      expect(repository).toBeDefined()
+    })
+  })
+  describe('create', () => {
+    it('should create a new photo', async () => {
+      // ARANGE
+      const createPhotoDto: CreatePhotoDto = {
+        albumId: 1,
+        title: 'Title 1',
+      }
+      const createInput: Partial<IPhoto> = {
+        album: { id: createPhotoDto.albumId },
+        title: createPhotoDto.title,
+      }
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+      const createResponse = Symbol('createResponse') as any
+      jest.spyOn(repository, 'create').mockReturnValue(createResponse)
 
-  it('should create a photo', async () => {
-    const dto = { title: 'Test Photo', albumId: 1 };
-    const album = { id: 1 };
-    const photo = { id: 1, title: 'Test Photo', album };
+      const saveResponse = Symbol('saveResponse') as never
+      jest.spyOn(repository, 'save').mockResolvedValue(saveResponse)
 
-    mockAlbumRepository.findOne.mockResolvedValue(album);
-    mockPhotoRepository.create.mockReturnValue(photo);
-    mockPhotoRepository.save.mockResolvedValue(photo);
+      // ACT
+      const received = await service.create(createPhotoDto)
 
-    expect(await service.create(dto)).toEqual(photo);
-    expect(mockPhotoRepository.create).toHaveBeenCalledWith({ album, title: dto.title });
-    expect(mockPhotoRepository.save).toHaveBeenCalledWith(photo);
-  });
+      // ASSERT
+      expect(repository.create).toHaveBeenCalledWith(createInput)
+      expect(repository.save).toHaveBeenCalledWith(createResponse)
+      expect(received).toBe(saveResponse)
+    })
+  })
+  describe('findById', () => {
+    it('should retrieve a photo by id', async () => {
+      // ARANGE
+      const id = 1
+      const findOneByInput = { id }
+      const findOneByOutput = Symbol('findOneByOutput') as any
 
-  it('should find a photo by ID', async () => {
-    const photo = { id: 1, title: 'Test Photo' };
-    mockPhotoRepository.findOne.mockResolvedValue(photo);
+      jest.spyOn(repository, 'findOneBy').mockResolvedValue(findOneByOutput)
 
-    expect(await service.findById(1)).toEqual(photo);
-    expect(mockPhotoRepository.findOne).toHaveBeenCalledWith({ where: { id: 1 } });
-  });
+      // ACT
+      const received = await service.findById(id)
 
-  it('should throw NotFoundException when photo is not found', async () => {
-    mockPhotoRepository.findOne.mockResolvedValue(null);
+      // ASSERT
+      expect(received).toEqual(findOneByOutput)
+      expect(repository.findOneBy).toHaveBeenLastCalledWith(findOneByInput)
+    })
+    it('should throw NotFoundException if no photo is found', async () => {
+      // ARANGE
+      const id = 1
+      const findOneByInput = { id }
+      const findOneByOutput = null
 
-    await expect(service.findById(1)).rejects.toThrow(NotFoundException);
-  });
+      jest.spyOn(repository, 'findOneBy').mockResolvedValue(findOneByOutput)
 
-  it('should delete a photo', async () => {
-    mockPhotoRepository.delete.mockResolvedValue({ affected: 1 });
+      // ACT
+      const received = service.findById(id)
 
-    expect(await service.remove(1)).toEqual({ message: 'Photo deleted successfully!' });
-    expect(mockPhotoRepository.delete).toHaveBeenCalledWith({ id: 1 });
-  });
+      // ASSERT
+      await expect(received).rejects.toThrow(new NotFoundException(`Photo with id: ${id} was not found.`))
+      expect(repository.findOneBy).toHaveBeenLastCalledWith(findOneByInput)
+    })
+  })
+  describe('remove', () => {
+    it('should remove a photo by id', async () => {
+      // ARANGE
+      const id = 1
+      const deleteInput = { id }
+      const deleteOutput = Symbol('deleteOutput') as any
 
-  it('should throw NotFoundException when deleting a non-existent photo', async () => {
-    mockPhotoRepository.delete.mockResolvedValue({ affected: 0 });
+      jest.spyOn(repository, 'delete').mockResolvedValue(deleteOutput)
 
-    await expect(service.remove(1)).rejects.toThrow(NotFoundException);
-  });
+      const expected = { message: 'Photo deleted successfully!' }
 
-  it('should update a photo', async () => {
-    const existingPhoto = { id: 1, title: 'Old Title', album: { id: 1 } };
-    const updateDto = { title: 'New Title' };
-    const updatedPhoto = { ...existingPhoto, ...updateDto };
+      // ACT
+      const received = await service.remove(id)
 
-    mockPhotoRepository.findOne.mockResolvedValue(existingPhoto);
-    mockPhotoRepository.create.mockReturnValue(updatedPhoto);
-    mockPhotoRepository.save.mockResolvedValue(updatedPhoto);
+      // ASSERT
+      expect(received).toEqual(expected)
+      expect(repository.delete).toHaveBeenLastCalledWith(deleteInput)
+    })
+    it('should throw NotFoundException if no photo is found', async () => {
+      // ARANGE
+      const id = 1
+      const deleteInput = { id }
+      const deleteOutput = { affected: 0 } as any
 
-    expect(await service.update(1, updateDto)).toEqual(updatedPhoto);
-    expect(mockPhotoRepository.create).toHaveBeenCalledWith(updatedPhoto);
-    expect(mockPhotoRepository.save).toHaveBeenCalledWith(updatedPhoto);
-  });
-});
+      jest.spyOn(repository, 'delete').mockResolvedValue(deleteOutput)
+
+      // ACT
+      const received = service.remove(id)
+
+      // ASSERT
+      await expect(received).rejects.toThrow(new NotFoundException(`Photo with id: ${id} was not found.`))
+      expect(repository.delete).toHaveBeenLastCalledWith(deleteInput)
+    })
+  })
+
+  describe('createMany', () => {
+    it('should create new photos', async () => {
+      // ARANGE
+      const photos = [Symbol('photo 1'), Symbol('photo 2')] as any
+      const createResponse = Symbol('createResponse') as never
+      const saveResponse = Symbol('saveResponse') as never
+
+      jest.spyOn(repository, 'create').mockReturnValue(createResponse)
+      jest.spyOn(repository, 'save').mockReturnValue(saveResponse)
+
+      // ACT
+
+      const received = await service.createMany(photos)
+
+      // ASSERT
+      expect(received).toEqual(saveResponse)
+      expect(repository.create).toHaveBeenLastCalledWith(photos)
+      expect(repository.save).toHaveBeenLastCalledWith(createResponse)
+    })
+  })
+  describe('update', () => {
+    it('should update a photo', async () => {
+      // ARANGE
+      const params = {
+        id: 1,
+        updatePhotoDto: { title: 'Some title!' },
+      }
+      const findByIdInput = params.id
+      const findByIdOutput = {id: 2, title: 'Some other title...'} as any
+      const createInput = {...findByIdOutput, ...params.updatePhotoDto}
+      const createOutput = Symbol('createOutput') as any
+      const saveOutput = Symbol('saveOutput') as any
+
+      jest.spyOn(service, 'findById').mockResolvedValue(findByIdOutput)
+      jest.spyOn(repository, 'create').mockReturnValue(createOutput)
+      jest.spyOn(repository, 'save').mockResolvedValue(saveOutput)
+
+      // ACT
+      const received = await service.update(params.id, params.updatePhotoDto)
+
+      // ASSERT
+      expect(received).toBe(saveOutput)
+      expect(service.findById).toHaveBeenLastCalledWith(findByIdInput)
+      expect(repository.create).toHaveBeenLastCalledWith(createInput)
+    })
+  })
+
+  describe('function', () => {
+    it('should c...', async () => {
+      // ARANGE
+
+      // ACT
+
+      // ASSERT
+      expect(1).toBe(1)
+    })
+  })
+})
