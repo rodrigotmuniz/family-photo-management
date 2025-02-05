@@ -31,7 +31,6 @@ export class GlobalAgnosticFilter implements ExceptionFilter {
   private getHttpStatus(exception: Error) {
     if (exception instanceof HttpException) return exception.getStatus()
     if (exception instanceof AxiosError) return exception.status || HttpStatus.INTERNAL_SERVER_ERROR
-    if (exception instanceof QueryFailedError) return HttpStatus.CONFLICT
     return HttpStatus.INTERNAL_SERVER_ERROR
   }
 
@@ -40,9 +39,6 @@ export class GlobalAgnosticFilter implements ExceptionFilter {
       const response = exception.getResponse()
       if (typeof response === 'string') return response
       return response['message']
-    }
-    if (exception instanceof QueryFailedError) {
-      return exception['detail']
     }
     return exception.message
   }

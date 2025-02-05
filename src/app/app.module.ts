@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common'
 import { APP_FILTER } from '@nestjs/core'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { AppController } from './app.controller'
-import { AppService } from './app.service'
-import { AuthModule } from './auth/auth.module'
-import { GlobalAgnosticFilter } from './commons/filters/global-agnostic.filter'
-import { IntegrationsModule } from './integrations/integrations.module'
-import { PhotosModule } from './photos/photos.module';
-import { AlbumsModule } from './albums/albums.module';
+import { AlbumsModule } from 'src/albums/albums.module'
+import { AuthModule } from 'src/auth/auth.module'
+import { IntegrationsModule } from 'src/integrations/integrations.module'
+import { PhotosModule } from 'src/photos/photos.module'
+import { GlobalAgnosticFilter } from './filters/global-agnostic.filter'
+import { QueryFailedErrorFilter } from './filters/query-failed-error.filter'
 
 @Module({
   imports: [
@@ -27,13 +26,15 @@ import { AlbumsModule } from './albums/albums.module';
     AlbumsModule,
     PhotosModule,
   ],
-  controllers: [AppController],
   providers: [
     {
       provide: APP_FILTER,
       useClass: GlobalAgnosticFilter,
     },
-    AppService,
+    {
+      provide: APP_FILTER,
+      useClass: QueryFailedErrorFilter,
+    },
   ],
 })
 export class AppModule {}

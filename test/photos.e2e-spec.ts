@@ -13,8 +13,9 @@ import { IPhoto } from '@app/my-library/interfaces/photo.interface'
 import { Photo } from 'src/photos/entities/photo.entity'
 import { PhotoResponseDto } from 'src/photos/dto/photo-response.dto'
 import { APP_FILTER } from '@nestjs/core'
-import { GlobalAgnosticFilter } from 'src/commons/filters/global-agnostic.filter'
+import { GlobalAgnosticFilter } from 'src/app/filters/global-agnostic.filter'
 import { ApiErrorResponseDto } from '@app/my-library/dtos/api-error-response.dto'
+import { QueryFailedErrorFilter } from 'src/app/filters/query-failed-error.filter'
 
 // jest.mock('@app/my-library/guards/jwt.guard', () => ({
 //   JwtAuthGuard: jest.fn().mockImplementation(() => ({
@@ -45,12 +46,16 @@ describe('PhotosController (e2e)', () => {
         AlbumsModule,
         PhotosModule,
       ],
-      providers: [
-        {
-          provide: APP_FILTER,
-          useClass: GlobalAgnosticFilter,
-        },
-      ],
+       providers: [
+         {
+           provide: APP_FILTER,
+           useClass: GlobalAgnosticFilter,
+          },
+          {
+            provide: APP_FILTER,
+            useClass: QueryFailedErrorFilter,
+          },
+        ],
     }).compile()
 
     app = module.createNestApplication()
