@@ -4,6 +4,8 @@ import { CreateAlbumDto } from './dto/create-album.dto'
 import { UpdateAlbumDto } from './dto/update-album.dto'
 import { JwtAuthGuard } from '@app/my-library/guards/jwt.guard'
 
+console.log('JwtAuthGuard', JwtAuthGuard)
+
 @Controller('albums')
 export class AlbumController {
   constructor(private readonly albumsService: AlbumsService) {}
@@ -25,7 +27,7 @@ export class AlbumController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   update(@Param('id') id: number, @Body() updateAlbumDto: UpdateAlbumDto) {
     return this.albumsService.update(id, updateAlbumDto)
   }

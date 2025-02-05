@@ -11,7 +11,7 @@
     "^.+\\.(t|j)s$": "ts-jest"
   },
   "moduleNameMapper": {
-    "@app/my-library": "<rootDir>/../libs/my-library/src",
-    "@app/my-library/(.*)": "<rootDir>/../libs/my-library/src/$1"
+    "@app/my-library/(.*)": "<rootDir>/../libs/my-library/src/$1",
+    "^src/(.*)$": "<rootDir>/../src/$1"
   }
 }

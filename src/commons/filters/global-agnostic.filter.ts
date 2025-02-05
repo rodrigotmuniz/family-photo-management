@@ -1,3 +1,4 @@
+import { ApiErrorResponseDto } from '@app/my-library/dtos/api-error-response.dto'
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common'
 import { HttpAdapterHost } from '@nestjs/core'
 import { AxiosError } from 'axios'
@@ -17,11 +18,11 @@ export class GlobalAgnosticFilter implements ExceptionFilter {
     const statusCode = this.getHttpStatus(exception)
     const message = this.getMessage(exception)
 
-    const responseBody = {
+    const responseBody: ApiErrorResponseDto = {
+      message,
       statusCode,
       timestamp: new Date().toISOString(),
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
-      message,
     }
 
     httpAdapter.reply(ctx.getResponse(), responseBody, statusCode)
@@ -29,7 +30,7 @@ export class GlobalAgnosticFilter implements ExceptionFilter {
 
   private getHttpStatus(exception: Error) {
     if (exception instanceof HttpException) return exception.getStatus()
-    if (exception instanceof AxiosError) return exception.status
+    if (exception instanceof AxiosError) return exception.status || HttpStatus.INTERNAL_SERVER_ERROR
     if (exception instanceof QueryFailedError) return HttpStatus.CONFLICT
     return HttpStatus.INTERNAL_SERVER_ERROR
   }

@@ -1,7 +1,7 @@
 import { IPhoto } from '@app/my-library/interfaces/photo.interface'
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
+import { QueryFailedError, Repository } from 'typeorm'
 import { CreatePhotoDto } from './dto/create-photo.dto'
 import { Photo } from './entities/photo.entity'
 import { UpdateAlbumDto } from 'src/albums/dto/update-album.dto'
@@ -26,7 +26,7 @@ export class PhotosService {
       album: { id: albumId },
       title,
     })
-    const savedAlbum = this.repository.save(createPhoto)
+    const savedAlbum = await this.repository.save(createPhoto)
     return savedAlbum
   }
 
@@ -53,7 +53,7 @@ export class PhotosService {
       ...photo,
       ...updatePhotoDto,
     })
-     const updatedPhoto = await this.repository.save(updatePhoto)
+    const updatedPhoto = await this.repository.save(updatePhoto)
     return updatedPhoto
   }
 }

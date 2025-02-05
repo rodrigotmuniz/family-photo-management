@@ -3,18 +3,19 @@ import { PhotosService } from './photos.service'
 import { UpdatePhotoDto } from './dto/update-photo.dto'
 import { CreatePhotoDto } from './dto/create-photo.dto'
 import { JwtAuthGuard } from '@app/my-library/guards/jwt.guard'
+import { PhotoResponseDto } from './dto/photo-response.dto'
 
 @Controller('photos')
 export class PhotosController {
   constructor(private readonly photosService: PhotosService) {}
 
   @Post()
-  create(@Body() createPhotoDto: CreatePhotoDto) {
+  create(@Body() createPhotoDto: CreatePhotoDto): Promise<PhotoResponseDto> {
     return this.photosService.create(createPhotoDto)
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.photosService.remove(id)
   }
@@ -25,7 +26,7 @@ export class PhotosController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard)
+  // @UseGuards(JwtAuthGuard)
   update(@Param('id') id: number, @Body() updatePhotoDto: UpdatePhotoDto) {
     return this.photosService.update(id, updatePhotoDto)
   }

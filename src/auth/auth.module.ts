@@ -12,7 +12,7 @@ import { JwtModule } from '@nestjs/jwt'
   imports: [
     TypeOrmModule.forFeature([User]),
     IntegrationsModule,
-    AlbumsModule,
+    forwardRef(() => AlbumsModule),
     PhotosModule,
     JwtModule.register({
       secret: process.env.AUTH_SECRET,
