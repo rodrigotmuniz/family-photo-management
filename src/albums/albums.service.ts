@@ -1,5 +1,5 @@
 import { IAlbum } from '@app/my-library/interfaces/album.interface'
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { CreateAlbumDto } from './dto/create-album.dto'
@@ -29,22 +29,18 @@ export class AlbumsService {
   }
 
   async findById(id: number) {
-    const album = await this.repository.findOne({ where: {id}, relations: ['photos'] })
+    const album = await this.repository.findOne({ where: { id }, relations: ['photos'] })
 
     if (!album) throw new NotFoundException(`Album with id: ${id} was not found.`)
     return album
   }
 
   async remove(id: number) {
-    // try {
-      const result = await this.repository.delete({ id })
-      if (result.affected === 0) {
-        throw new NotFoundException(`Album with id ${id} was not found`)
-      }
-      return { message: 'Album deleted successfully!' }
-    // } catch(error) {
-    //   console.log(error)
-    // }
+    const result = await this.repository.delete({ id })
+    if (result.affected === 0) {
+      throw new NotFoundException(`Album with id ${id} was not found`)
+    }
+    return { message: 'Album deleted successfully!' }
   }
 
   async update(id: number, updateAlbumDto: UpdateAlbumDto) {

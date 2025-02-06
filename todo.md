@@ -1,0 +1,2 @@
+- Add logs
+- Add passwordHash

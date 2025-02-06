@@ -4,8 +4,6 @@ import { CreateAlbumDto } from './dto/create-album.dto'
 import { UpdateAlbumDto } from './dto/update-album.dto'
 import { JwtAuthGuard } from '@app/my-library/guards/jwt.guard'
 
-console.log('JwtAuthGuard', JwtAuthGuard)
-
 @Controller('albums')
 export class AlbumController {
   constructor(private readonly albumsService: AlbumsService) {}

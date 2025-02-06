@@ -10,6 +10,8 @@ import configuration from '../integrations/integrations.config'
 import dbConfig from './config/database.config'
 import { GlobalAgnosticFilter } from './filters/global-agnostic.filter'
 import { QueryFailedErrorFilter } from './filters/query-failed-error.filter'
+import { AxiosErrorFilter } from './filters/axios-error.filter'
+import { HttpExceptionFilter } from './filters/http-exception.filter'
 
 @Module({
   imports: [
@@ -33,6 +35,14 @@ import { QueryFailedErrorFilter } from './filters/query-failed-error.filter'
     {
       provide: APP_FILTER,
       useClass: QueryFailedErrorFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: AxiosErrorFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
     },
   ],
 })

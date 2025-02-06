@@ -8,20 +8,12 @@ import { PhotoResponseDto } from 'src/photos/dto/photo-response.dto'
 import { ApiErrorResponseDto } from '@app/my-library/dtos/api-error-response.dto'
 import { AppModule } from 'src/app/app.module'
 
-// jest.mock('@app/my-library/guards/jwt.guard', () => ({
-//   JwtAuthGuard: jest.fn().mockImplementation(() => ({
-//     canActivate: jest.fn().mockReturnValue(true),
-//   })),
-// }))
-
 describe('PhotosController (e2e)', () => {
   let app: INestApplication<App>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-       providers: [
-        ],
     }).compile()
 
     app = module.createNestApplication()
