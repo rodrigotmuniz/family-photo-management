@@ -1,16 +1,13 @@
-import { Module } from '@nestjs/common'
-import { IntegrationsService } from './integrations.service'
-import { IntegrationsController } from './integrations.controller'
 import { HttpModule } from '@nestjs/axios'
+import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import configuration from './config/configuration'
+import { IntegrationsController } from './integrations.controller'
+import { IntegrationsService } from './integrations.service'
+import integrationsConfig from './integrations.config'
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ 
-      load: [configuration],
-      expandVariables: true,
-    }),
+    ConfigModule.forFeature(integrationsConfig),
     HttpModule,
   ],
   controllers: [IntegrationsController],
@@ -18,4 +15,3 @@ import configuration from './config/configuration'
   exports: [IntegrationsService],
 })
 export class IntegrationsModule {}
- 

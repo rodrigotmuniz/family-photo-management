@@ -1,12 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common'
+import { JwtModule } from '@nestjs/jwt'
 import { TypeOrmModule } from '@nestjs/typeorm'
+import { AlbumsModule } from 'src/albums/albums.module'
 import { IntegrationsModule } from 'src/integrations/integrations.module'
+import { PhotosModule } from 'src/photos/photos.module'
+import jwtConfig from './auth.config'
 import { AuthController } from './auth.controller'
 import { AuthService } from './auth.service'
 import { User } from './entities/user.entity'
-import { AlbumsModule } from 'src/albums/albums.module'
-import { PhotosModule } from 'src/photos/photos.module'
-import { JwtModule } from '@nestjs/jwt'
 
 @Module({
   imports: [
@@ -14,13 +15,10 @@ import { JwtModule } from '@nestjs/jwt'
     IntegrationsModule,
     forwardRef(() => AlbumsModule),
     PhotosModule,
-    JwtModule.register({
-      secret: process.env.AUTH_SECRET,
-      signOptions: { expiresIn: process.env.AUTH_EXPIRES_IN },
-    }),
+    JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService],
+  exports: [AuthService], 
 })
 export class AuthModule {}
