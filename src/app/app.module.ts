@@ -12,6 +12,8 @@ import { GlobalAgnosticFilter } from './filters/global-agnostic.filter'
 import { QueryFailedErrorFilter } from './filters/query-failed-error.filter'
 import { AxiosErrorFilter } from './filters/axios-error.filter'
 import { HttpExceptionFilter } from './filters/http-exception.filter'
+import { ApolloDriverConfig, ApolloDriver } from '@nestjs/apollo'
+import { GraphQLModule } from '@nestjs/graphql'
 
 @Module({
   imports: [
@@ -26,6 +28,9 @@ import { HttpExceptionFilter } from './filters/http-exception.filter'
     AlbumsModule,
     PhotosModule,
     TypeOrmModule.forRootAsync(dbConfig.asProvider()),
+    // GraphQLModule.forRoot<ApolloDriverConfig>({
+    //   driver: ApolloDriver,
+    // }),
   ],
   providers: [
     {

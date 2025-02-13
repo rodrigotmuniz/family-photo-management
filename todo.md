@@ -1,2 +1,3 @@
 - Add logs
 - Add passwordHash
+- add swagger
